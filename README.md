@@ -40,4 +40,5 @@ site/       Astro + React islands — static frontend consuming pipeline output 
 
 ## Status
 
-Early build-out in progress. See `pipeline/README.md` for pipeline usage.
+Early build-out in progress. See `PLAN.md` for the implementation plan and
+`pipeline/README.md` for pipeline usage.

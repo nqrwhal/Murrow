@@ -1,0 +1,112 @@
+---
+import "../styles/global.css";
+
+const pillars = [
+  {
+    label: "Blind comparison",
+    detail:
+      "Pairwise model judgments are randomized and position-debiased before they feed the leaderboard.",
+  },
+  {
+    label: "Wire baseline",
+    detail:
+      "Coverage is measured against a neutral AP/Reuters-style event baseline instead of a partisan reference point.",
+  },
+  {
+    label: "Static receipts",
+    detail:
+      "Published artifacts keep scores, citations, snippets, and links while leaving copyrighted article bodies out of the site.",
+  },
+];
+
+const metrics = [
+  "Loaded language",
+  "Omitted facts",
+  "Attribution balance",
+  "Headline fidelity",
+  "Word-choice swaps",
+  "Evidence quality",
+];
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width" />
+		<meta
+			name="description"
+			content="Murrow is a model-agnostic benchmark for measuring how news outlets cover the same event differently."
+		/>
+		<meta name="generator" content={Astro.generator} />
+		<title>Murrow | Media Coverage Benchmark</title>
+	</head>
+	<body>
+		<main class="site-shell">
+			<section class="hero" aria-labelledby="hero-title">
+				<div class="hero__copy">
+					<p class="eyebrow">Model-agnostic media coverage benchmark</p>
+					<h1 id="hero-title">
+						Measure how outlets cover the same event differently.
+					</h1>
+					<p class="hero__lede">
+						Murrow compares coverage across the political spectrum against a
+						neutral wire-service baseline, using LLMs as measurement
+						instruments rather than partisan judges.
+					</p>
+					<div class="hero__actions" aria-label="Project links">
+						<a class="button button--primary" href="https://github.com/nqrwhal/Murrow">
+							View methodology
+						</a>
+						<a class="button button--ghost" href="#benchmark">
+							How scoring works
+						</a>
+					</div>
+				</div>
+
+				<aside class="scorecard" aria-label="Benchmark preview">
+					<div class="scorecard__header">
+						<span>Offline leaderboard</span>
+						<strong>ELO</strong>
+					</div>
+					<div class="scorecard__row">
+						<span>Evidence-backed measurements</span>
+						<b>6</b>
+					</div>
+					<div class="scorecard__row">
+						<span>Visitor traffic required</span>
+						<b>0</b>
+					</div>
+					<div class="scorecard__row">
+						<span>Article bodies published</span>
+						<b>0</b>
+					</div>
+					<p>
+						The first benchmark run targets <code>openai/gpt-oss-120b</code>,
+						with the same corpus reusable across Pioneer-hosted models.
+					</p>
+				</aside>
+			</section>
+
+			<section class="pillars" aria-label="Benchmark principles">
+				{pillars.map((pillar) => (
+					<article class="pillar">
+						<h2>{pillar.label}</h2>
+						<p>{pillar.detail}</p>
+					</article>
+				))}
+			</section>
+
+			<section class="benchmark" id="benchmark" aria-labelledby="benchmark-title">
+				<div>
+					<p class="eyebrow">What gets measured</p>
+					<h2 id="benchmark-title">A symmetric rubric, not a vibe check.</h2>
+				</div>
+				<ul class="metric-grid">
+					{metrics.map((metric) => <li>{metric}</li>)}
+				</ul>
+			</section>
+		</main>
+	</body>
+</html>
