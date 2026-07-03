@@ -65,6 +65,9 @@ def _call_with_backoff(client: Anthropic, **kwargs: Any):
         raise LLMCallError(f"Non-retryable API error {exc.status_code}: {exc.message}") from exc
 
 
+_MAX_SCHEMA_RETRIES = 2  # extra attempts after a schema-invalid tool call, beyond the first try
+
+
 def structured_call[T: BaseModel](
     *,
     model: str,
@@ -76,8 +79,16 @@ def structured_call[T: BaseModel](
 ) -> tuple[T, dict]:
     """Call `model` and force it to emit `schema_model` via tool-calling.
 
-    Returns (parsed_result, raw_response_dict) — the raw dict is for llm_raw/ audit
-    logging so every measurement is reproducible/inspectable.
+    Weaker models on Pioneer's ~150-model catalogue occasionally emit a tool call
+    that doesn't quite match the schema (wrong field name, missing required field).
+    Rather than dropping that article/battle from the benchmark, we feed the
+    validation error back to the model and give it up to `_MAX_SCHEMA_RETRIES`
+    chances to self-correct before giving up as LLMCallError — this keeps a
+    model's article coverage comparable to others' rather than penalizing it for
+    a minor formatting slip unrelated to its actual measurement quality.
+
+    Returns (parsed_result, raw_response_dict) — the raw dict is the LAST attempt's
+    response, for llm_raw/ audit logging so every measurement is inspectable.
     """
     schema = schema_model.model_json_schema()
     # Anthropic tool schemas don't want a top-level $defs-only ref; inline is fine
@@ -93,26 +104,47 @@ def structured_call[T: BaseModel](
     ]
 
     client = _client()
-    response = _call_with_backoff(
-        client,
-        model=model,
-        max_tokens=max_tokens,
-        temperature=temperature,
-        system=system,
-        tools=tools,
-        tool_choice={"type": "tool", "name": _TOOL_NAME},
-        messages=[{"role": "user", "content": user}],
+    messages: list[dict[str, Any]] = [{"role": "user", "content": user}]
+
+    last_error: Exception | None = None
+    for attempt in range(_MAX_SCHEMA_RETRIES + 1):
+        response = _call_with_backoff(
+            client,
+            model=model,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            system=system,
+            tools=tools,
+            tool_choice={"type": "tool", "name": _TOOL_NAME},
+            messages=messages,
+        )
+        raw = response.model_dump()
+
+        tool_block = next((b for b in response.content if b.type == "tool_use"), None)
+        if tool_block is None:
+            last_error = LLMCallError(
+                f"Model {model} did not return a tool_use block (stop_reason={response.stop_reason})"
+            )
+        else:
+            try:
+                parsed = schema_model.model_validate(tool_block.input)
+                return parsed, raw
+            except Exception as exc:  # noqa: BLE001 - fed back to the model as a correction prompt
+                last_error = exc
+
+        if attempt < _MAX_SCHEMA_RETRIES:
+            messages.append({"role": "assistant", "content": response.content})
+            messages.append(
+                {
+                    "role": "user",
+                    "content": (
+                        f"Your previous tool call was invalid: {last_error}\n"
+                        f"Call {_TOOL_NAME} again with corrected input matching the schema exactly."
+                    ),
+                }
+            )
+
+    raise LLMCallError(
+        f"Model {model} failed to produce a schema-valid {schema_model.__name__} "
+        f"after {_MAX_SCHEMA_RETRIES + 1} attempts: {last_error}"
     )
-
-    raw = response.model_dump()
-
-    tool_block = next((b for b in response.content if b.type == "tool_use"), None)
-    if tool_block is None:
-        raise LLMCallError(f"Model {model} did not return a tool_use block (stop_reason={response.stop_reason})")
-
-    try:
-        parsed = schema_model.model_validate(tool_block.input)
-    except Exception as exc:  # noqa: BLE001 - surface as LLMCallError for callers
-        raise LLMCallError(f"Model {model} tool input failed schema validation: {exc}") from exc
-
-    return parsed, raw

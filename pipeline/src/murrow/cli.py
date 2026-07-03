@@ -39,8 +39,22 @@ def _cmd_baseline(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_metrics(args: argparse.Namespace) -> int:
+    from .stages import metrics
+
+    metrics.run(event_id=args.event_id, model=args.model)
+    return 0
+
+
+def _cmd_battles(args: argparse.Namespace) -> int:
+    from .stages import battles
+
+    battles.run(event_id=args.event_id, model=args.model)
+    return 0
+
+
 def _cmd_build(args: argparse.Namespace) -> int:
-    print("murrow build: full pipeline orchestration lands with the metrics/battles/publish stages.")
+    print("murrow build: full pipeline orchestration lands with the aggregate/publish stages.")
     return 0
 
 
@@ -66,6 +80,16 @@ def main(argv: list[str] | None = None) -> int:
     p_baseline = sub.add_parser("baseline", help="Extract the neutral key-fact baseline for an event")
     p_baseline.add_argument("--event-id", required=True)
     p_baseline.set_defaults(func=_cmd_baseline)
+
+    p_metrics = sub.add_parser("metrics", help="Extract per-article metrics for a benchmark model")
+    p_metrics.add_argument("--event-id", required=True)
+    p_metrics.add_argument("--model", required=True)
+    p_metrics.set_defaults(func=_cmd_metrics)
+
+    p_battles = sub.add_parser("battles", help="Run blind pairwise judging for a benchmark model")
+    p_battles.add_argument("--event-id", required=True)
+    p_battles.add_argument("--model", required=True)
+    p_battles.set_defaults(func=_cmd_battles)
 
     p_build = sub.add_parser("build", help="Run the full pipeline")
     p_build.set_defaults(func=_cmd_build)
