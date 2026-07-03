@@ -1,0 +1,32 @@
+# === Secrets (NEVER commit) ===
+.env
+.env.*
+*.key
+secrets.toml
+
+# === Legal firewall: transient full article text is NEVER committed ===
+pipeline/data/fulltext/
+
+# === Python ===
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# === uv ===
+# uv.lock IS committed (reproducibility); nothing to ignore here
+
+# === Node / Astro ===
+node_modules/
+site/dist/
+site/.astro/
+.DS_Store
+
+# === Editor ===
+.vscode/
+.idea/
+*.swp

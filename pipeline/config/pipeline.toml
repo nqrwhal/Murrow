@@ -1,0 +1,28 @@
+# Murrow pipeline tuning. See config.py for defaults if a key is omitted here.
+
+user_agent = "MurrowBot/0.1 (media-bias research; +https://github.com/nqrwhal/Murrow)"
+
+[models]
+# Builds the baseline key-fact yardstick that every benchmark model is judged against.
+reference_model = "claude-opus-4-8"
+# The first model to run the full benchmark (per project brief).
+default_benchmark_model = "openai/gpt-oss-120b"
+max_output_tokens = 4096
+
+[thresholds]
+min_outlets = 6
+thin_chars = 500
+
+[elo]
+k_factor = 24
+provisional_k = 40
+provisional_until = 10
+epochs = 20
+seed = 1729
+provisional_threshold = 20
+bootstrap_samples = 500
+
+[prompt_versions]
+baseline = "v1"
+extract = "v1"
+judge = "v1"

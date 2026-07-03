@@ -1,0 +1,105 @@
+# Murrow outlet registry.
+#
+# spectrum / spectrum_score are external-context labels only (Murrow does not
+# invent its own lean ratings). They are placeholder consensus values pending
+# reconciliation against a cited source (AllSides / Ad Fontes Media) — record the
+# citation in meta.json when that pass happens. Wire services (is_baseline=true)
+# are the neutral yardstick and are excluded from the competing ELO leaderboard.
+
+[[outlet]]
+id = "ap"
+name = "Associated Press"
+domains = ["apnews.com"]
+spectrum = "C"
+spectrum_score = 0
+homepage_url = "https://apnews.com"
+is_baseline = true
+
+[[outlet]]
+id = "reuters"
+name = "Reuters"
+domains = ["reuters.com"]
+spectrum = "C"
+spectrum_score = 0
+homepage_url = "https://www.reuters.com"
+is_baseline = true
+
+[[outlet]]
+id = "nytimes"
+name = "The New York Times"
+domains = ["nytimes.com"]
+spectrum = "LC"
+spectrum_score = -3
+homepage_url = "https://www.nytimes.com"
+
+[[outlet]]
+id = "washingtonpost"
+name = "The Washington Post"
+domains = ["washingtonpost.com"]
+spectrum = "LC"
+spectrum_score = -3
+homepage_url = "https://www.washingtonpost.com"
+
+[[outlet]]
+id = "cnn"
+name = "CNN"
+domains = ["cnn.com"]
+spectrum = "L"
+spectrum_score = -4
+homepage_url = "https://www.cnn.com"
+
+[[outlet]]
+id = "theguardian"
+name = "The Guardian (US)"
+domains = ["theguardian.com"]
+spectrum = "L"
+spectrum_score = -4
+homepage_url = "https://www.theguardian.com/us"
+
+[[outlet]]
+id = "npr"
+name = "NPR"
+domains = ["npr.org"]
+spectrum = "LC"
+spectrum_score = -2
+homepage_url = "https://www.npr.org"
+
+[[outlet]]
+id = "foxnews"
+name = "Fox News"
+domains = ["foxnews.com"]
+spectrum = "R"
+spectrum_score = 4
+homepage_url = "https://www.foxnews.com"
+
+[[outlet]]
+id = "nypost"
+name = "New York Post"
+domains = ["nypost.com"]
+spectrum = "RC"
+spectrum_score = 3
+homepage_url = "https://nypost.com"
+
+[[outlet]]
+id = "washingtonexaminer"
+name = "Washington Examiner"
+domains = ["washingtonexaminer.com"]
+spectrum = "R"
+spectrum_score = 3
+homepage_url = "https://www.washingtonexaminer.com"
+
+[[outlet]]
+id = "dailywire"
+name = "The Daily Wire"
+domains = ["dailywire.com"]
+spectrum = "R"
+spectrum_score = 5
+homepage_url = "https://www.dailywire.com"
+
+[[outlet]]
+id = "nationalreview"
+name = "National Review"
+domains = ["nationalreview.com"]
+spectrum = "RC"
+spectrum_score = 3
+homepage_url = "https://www.nationalreview.com"

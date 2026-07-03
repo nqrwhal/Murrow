@@ -1,0 +1,44 @@
+[project]
+name = "murrow"
+version = "0.1.0"
+description = "Murrow — measure how outlets spin the same story vs a neutral wire baseline. Build-once, model-agnostic media-bias benchmark."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=0.40",
+    "pydantic>=2.9",
+    "httpx[http2]>=0.27",
+    "trafilatura>=1.12",
+    "selectolax>=0.3.21",
+    "tenacity>=9.0",
+    "tomli-w>=1.0",
+    "rich>=13.9",
+]
+
+[project.scripts]
+murrow = "murrow.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "ruff>=0.7",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/murrow"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

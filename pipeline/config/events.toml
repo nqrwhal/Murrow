@@ -1,0 +1,20 @@
+# Murrow curated event registry.
+#
+# This file pins *intent* (a query + a time window). The authoritative captured
+# *reality* after `murrow discover` is the committed data/raw/events/<id>/ snapshot —
+# GDELT's rolling 3-month window means this file alone is not reproducible on its own.
+#
+# start/end are GDELT datetimes: YYYYMMDDHHMMSS, must fall within the last 3 months
+# at the time `murrow discover` is run. Keep each window tight (24-72h) around the
+# event so `collect` resolves one clearly-on-topic article per outlet.
+#
+# This is a starter seed list — add more via `murrow discover --query ...` as the
+# corpus grows toward the ~30-75 event target.
+
+[[event]]
+id = "seed-001"
+title = "PLACEHOLDER — replace via murrow discover"
+query = "REPLACE ME"
+start = "20260601000000"
+end = "20260603000000"
+category = "general"
