@@ -264,3 +264,49 @@ class RunMeta(BaseModel):
     n_articles: int
     n_battles: int
     gdelt_window: str = "rolling-3mo"
+
+
+class PublishedEventIndexEntry(BaseModel):
+    """events.json — lightweight index imported at Astro build time."""
+
+    id: str
+    title: str
+    slug: str
+    date: str
+    category: str
+    baseline_outlet: str
+    n_outlets: int
+
+
+class PublishedArticle(BaseModel):
+    """One outlet's article within a published event detail — no article body."""
+
+    outlet_id: str
+    headline: str
+    url: str
+    published_at: datetime | None = None
+    metrics: ArticleMetrics
+    closeness_score: float
+
+
+class PublishedBattle(BaseModel):
+    """One battle within a published event detail, in real-outlet space."""
+
+    outlet_a: str
+    outlet_b: str
+    winner_outlet: str | None
+    order_swap_agreed: bool
+    receipt_a: Snippet = ""
+    receipt_b: Snippet = ""
+    reasoning: Snippet = ""
+
+
+class PublishedEventDetail(BaseModel):
+    """events/<id>.json — the heavy per-event artifact, fetched client-side."""
+
+    id: str
+    title: str
+    date: str
+    baseline: Baseline
+    articles: list[PublishedArticle]
+    battles: list[PublishedBattle]

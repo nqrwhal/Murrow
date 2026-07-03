@@ -53,9 +53,49 @@ def _cmd_battles(args: argparse.Namespace) -> int:
     return 0
 
 
-def _cmd_build(args: argparse.Namespace) -> int:
-    print("murrow build: full pipeline orchestration lands with the aggregate/publish stages.")
+def _cmd_aggregate(args: argparse.Namespace) -> int:
+    from .stages import aggregate
+
+    aggregate.run(model=args.model)
     return 0
+
+
+def _cmd_publish(args: argparse.Namespace) -> int:
+    from datetime import UTC, datetime
+
+    from .stages import publish
+
+    publish.run(model=args.model)
+    # Stamp built_at post-hoc: workflow/stage code can't call datetime.now() internally
+    # (see publish.py's comment), so the CLI entrypoint — which always runs live — does it.
+    meta_path = publish.SITE_DATA_DIR / "meta.json"
+    if meta_path.exists():
+        import json
+
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        meta["built_at"] = datetime.now(UTC).isoformat()
+        meta_path.write_text(json.dumps(meta, indent=2), encoding="utf-8")
+    return 0
+
+
+def _cmd_build(args: argparse.Namespace) -> int:
+    from .config import load_events
+    from .stages import aggregate, baseline, battles, collect, fetch, metrics
+
+    for spec in load_events():
+        print(f"=== {spec.id} ===")
+        collect.run(event_id=spec.id)
+        fetch.run(event_id=spec.id)
+        try:
+            baseline.run(event_id=spec.id)
+        except RuntimeError as exc:
+            print(f"  skipping baseline/metrics/battles for {spec.id}: {exc}")
+            continue
+        metrics.run(event_id=spec.id, model=args.model)
+        battles.run(event_id=spec.id, model=args.model)
+
+    aggregate.run(model=args.model)
+    return _cmd_publish(argparse.Namespace(model=args.model))
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -91,7 +131,16 @@ def main(argv: list[str] | None = None) -> int:
     p_battles.add_argument("--model", required=True)
     p_battles.set_defaults(func=_cmd_battles)
 
-    p_build = sub.add_parser("build", help="Run the full pipeline")
+    p_aggregate = sub.add_parser("aggregate", help="Compute ELO standings for a benchmark model")
+    p_aggregate.add_argument("--model", required=True)
+    p_aggregate.set_defaults(func=_cmd_aggregate)
+
+    p_publish = sub.add_parser("publish", help="Publish a benchmark model's run as static site JSON")
+    p_publish.add_argument("--model", required=True)
+    p_publish.set_defaults(func=_cmd_publish)
+
+    p_build = sub.add_parser("build", help="Run collect->fetch->baseline->metrics->battles->aggregate->publish for every configured event")
+    p_build.add_argument("--model", required=True)
     p_build.set_defaults(func=_cmd_build)
 
     args = parser.parse_args(argv)
